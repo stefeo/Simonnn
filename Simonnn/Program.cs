@@ -5,10 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
+/// <summary>
+/// Stefan Andrekovic
+/// Started February 13th 2017
+/// Completed February 17th 2017
+/// 
+/// ICS4U @ SCSS
+/// </summary>
+/// 
 namespace Simonnn
 {
     class Program
     {
+        #region  Declaring lists, vars, and randoms.
         public static List<char> simonPattern = new List<char>();
         public static List<char> playerPattern = new List<char>();
 
@@ -24,16 +33,19 @@ namespace Simonnn
         const int CHARACTER_INTERVAL_IN_MILLISECONDS = 30;
         const int PARAGRAPH_INTERVAL_IN_MILLISECONDS = 250;
 
-        private static readonly string[] PARAGRAPHS = {"Welcome to Simon", "Type 'play' to play the game, or type 'exit' to quit"};
+        private static string[] PARAGRAPHS = {"Welcome to Simon", "Type 'play' to play the game, 'help' to learn how to play the game, or type 'exit' to quit"};
+        #endregion
 
         static int Main(string[] args)
         {
             declare();
+            //title screen text
             foreach (string paragraph in PARAGRAPHS)
             {
                 Display(paragraph);
             }
 
+            //waiting for further input
             string s = Console.ReadLine();
 
             if (s == "exit")
@@ -44,12 +56,14 @@ namespace Simonnn
             {
                 gamePlayer(turnNum, simonPattern, loopCounter);
             }
-            else
+            else if (s == "help")
             {
-
+                helpScreen();
             }
-            //Console.ReadLine();
+
             Console.Clear();
+
+            //re make menu screen
             Main(args);
 
             return 0;
@@ -57,17 +71,24 @@ namespace Simonnn
 
         public static void declare()
         {
+            //declaring and resetting all values.
             Console.BackgroundColor = ConsoleColor.Black;
+
+            PARAGRAPHS[0] = "Welcome to Simon";
+            PARAGRAPHS[1] = "Type 'play' to play the game, 'help' to learn how to play the game, or type 'exit' to quit";
 
             simonPattern.Clear();
             playerPattern.Clear();
             turnNum = 0;
             loopCounter = 0;
             playerCorrect = true;
+            cycleTime = 1000;
         }
 
+        #region flowing text code, and text formatting
         public static void Display(string paragraph)
         {
+            //flowing text from PARAGRAPHS
             EndOfLine();
             foreach (char ch in paragraph)
             {
@@ -108,8 +129,33 @@ namespace Simonnn
             return;
         }
 
+        public static void formatText()
+        {
+            //formatting for text showing up on player turn
+            Console.Clear();
+            for (int j = 0; j < 13; j++)
+            {
+                EndOfLine();
+            }
+            Console.Write("                                                                             ");
+        }
+
+        public static void sFormatText()
+        {
+            //formatting for text showing on simon turn
+            Console.Clear();
+            for (int j = 0; j < 13; j++)
+            {
+                EndOfLine();
+            }
+            Console.Write("                                            ");
+        }
+        #endregion
+
+        #region game loops, and turns code
         public static void gamePlayer(int turnNum, List<char> simonPattern, int loopCounter)
         {
+            //infinite game loop until you lose.
             while (loopCounter >= 0)
             {
                 if (playerCorrect == true)
@@ -117,8 +163,9 @@ namespace Simonnn
                     simonTurn(simonPattern);
 
                     playerTurn(turnNum, simonPattern, playerPattern);
-
-                    cycleTime -= 50;
+                    
+                    //faster every round
+                    cycleTime -= 75;
                 }
 
                 else
@@ -132,10 +179,11 @@ namespace Simonnn
 
         public static void simonTurn(List<char> simonPattern)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            //getting random letter, adding to list, and showing list procedurally with random colours.
             simonPattern.Add(GetLetter());
             for (int i = 0; i < simonPattern.Count(); i++)
             {
+                Console.ForegroundColor = GetRandomConsoleColor();
                 sFormatText();
                 Console.Write(simonPattern[i]);
                 Console.Beep();
@@ -149,6 +197,7 @@ namespace Simonnn
 
         public static void playerTurn(int turnNum, List<char> simonPattern, List<char> playerPattern)
         {
+            //fetching player letters, checking with simon pattern, and adding to player pattern
             playerPattern.Clear();
             for (int i = 0; i < simonPattern.Count(); i++)
             {
@@ -169,36 +218,15 @@ namespace Simonnn
 
             return;
         }
+        #endregion
 
-        public static char GetLetter()
-        {
-            int num = random.Next(0, 26);
-            char let = (char)('a' + num);
-            return let;
-        }
+        #region screens
 
-        public static void formatText()
-        {
-            Console.Clear();
-            for (int j = 0; j < 13; j++)
-            {
-                EndOfLine();
-            }
-            Console.Write("                                                                             ");
-        }
-
-        public static void sFormatText()
-        {
-            Console.Clear();
-            for (int j = 0; j < 13; j++)
-            {
-                EndOfLine();
-            }
-            Console.Write("                                            ");
-        }
 
         public static void gameOver()
         {
+            //showing game over screen with score until player presses space
+
             Console.BackgroundColor = ConsoleColor.Red;
 
             for (int i = 0; i >= 0; i++)
@@ -219,7 +247,7 @@ namespace Simonnn
                     EndOfLine();
                 }
                 Console.Write("                                                   ");
-                Console.Write("YOU REACHED LEVEL " + simonPattern.Count() );
+                Console.Write("YOU REACHED LEVEL " + simonPattern.Count());
                 Console.Beep();
                 char c = Console.ReadKey().KeyChar;
                 if (c == ' ')
@@ -230,5 +258,41 @@ namespace Simonnn
                 }
             }
         }
+
+        public static void helpScreen()
+        {
+            //changing flowing text to help text, and then flowing it onto page in green.
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Green;
+            PARAGRAPHS[0] = "HOW TO PLAY SIMON:";
+            PARAGRAPHS[1] = "Simon will press a letter every turn, then it is your job to copy the letter he has pressed. Each consecutive turn you  correctly copy Simon, he will add another letter to the pattern. See how long you can keep up with Simon!";
+            foreach (string paragraph in PARAGRAPHS)
+            {
+                Display(paragraph);
+            }
+            Console.ResetColor();
+            Console.ReadKey();
+        }
+        #endregion
+
+        #region random gens
+        public static ConsoleColor GetRandomConsoleColor()
+        {
+            //getting random colour, excluding 0 - 7 (too dark), using the colour Enum to convert to console colour.
+
+            var consoleColors = Enum.GetValues(typeof(ConsoleColor));
+            return (ConsoleColor)consoleColors.GetValue(random.Next(7, 15));
+        }
+
+        public static char GetLetter()
+        {
+            //fetching random letter for simon's pattern
+
+            int num = random.Next(0, 26);
+            char let = (char)('a' + num);
+            return let;
+        }
+        #endregion
     }
 }
